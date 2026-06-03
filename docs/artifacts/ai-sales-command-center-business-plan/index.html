@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Sales Command Center — Visual Business Plan</title>
+  <style>
+    :root {
+      --bg: #f5f1e8;
+      --ink: #15120d;
+      --muted: #6d6658;
+      --soft: #e8dfcf;
+      --line: #d7cbb9;
+      --card: #fffaf0;
+      --green: #1f7a4d;
+      --green-soft: #d9efe3;
+      --red: #c3412f;
+      --red-soft: #f6d9d4;
+      --gold: #c88a2d;
+      --blue: #315f9c;
+      --blue-soft: #dce8f8;
+      --black: #15120d;
+      --shadow: 0 28px 80px rgba(55, 44, 24, 0.16);
+      --radius: 28px;
+      --slide-w: 1600px;
+      --slide-h: 900px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); }
+    body { overflow: hidden; }
+
+    .app {
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+    }
+
+    aside {
+      border-right: 1px solid var(--line);
+      padding: 26px 20px;
+      background: rgba(255, 250, 240, 0.72);
+      backdrop-filter: blur(18px);
+      overflow: auto;
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+    .mark { width: 40px; height: 40px; border-radius: 14px; background: var(--black); color: #fffaf0; display: grid; place-items: center; font-weight: 900; }
+    .brand b { display:block; font-size: 15px; letter-spacing: -0.02em; }
+    .brand span { display:block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .nav { display: grid; gap: 8px; }
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+      padding: 11px 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1.25;
+      display: grid;
+      grid-template-columns: 26px 1fr;
+      gap: 8px;
+      align-items: start;
+    }
+    .nav button:hover { background: rgba(21,18,13,.06); color: var(--ink); }
+    .nav button.active { background: var(--black); color: #fffaf0; }
+    .nav small { opacity: .62; font-weight: 800; }
+
+    .side-note {
+      margin-top: 26px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      background: rgba(255,250,240,.55);
+    }
+
+    main { position: relative; display: grid; place-items: center; padding: 28px; overflow: hidden; }
+    .stage { width: min(100%, var(--slide-w)); aspect-ratio: 16 / 9; position: relative; }
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 34px;
+      box-shadow: var(--shadow);
+      padding: 56px 64px;
+      display: none;
+      overflow: hidden;
+    }
+    .slide.active { display: block; animation: enter .32s cubic-bezier(.2,.8,.2,1); }
+    @keyframes enter { from { opacity: 0; transform: translateY(12px) scale(.99); } to { opacity: 1; transform: none; } }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: -35% auto auto 55%;
+      width: 620px; height: 620px;
+      background: radial-gradient(circle, rgba(200,138,45,.20), transparent 62%);
+      pointer-events: none;
+    }
+
+    .kicker { color: var(--gold); text-transform: uppercase; letter-spacing: .13em; font-size: 13px; font-weight: 900; margin-bottom: 16px; }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(56px, 6vw, 92px); letter-spacing: -0.07em; line-height: .9; max-width: 1050px; }
+    h2 { font-size: clamp(42px, 4.6vw, 70px); letter-spacing: -0.055em; line-height: .95; max-width: 1050px; }
+    h3 { font-size: 24px; letter-spacing: -0.025em; }
+    .lead { color: var(--muted); font-size: 25px; line-height: 1.28; max-width: 980px; margin-top: 24px; }
+    .micro { color: var(--muted); font-size: 15px; line-height: 1.45; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 34px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 34px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 28px; }
+    .card {
+      position: relative;
+      background: rgba(255,255,255,.48);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .card.dark { background: var(--black); color: #fffaf0; border-color: var(--black); }
+    .card.green { background: var(--green-soft); border-color: rgba(31,122,77,.25); }
+    .card.red { background: var(--red-soft); border-color: rgba(195,65,47,.25); }
+    .card.blue { background: var(--blue-soft); border-color: rgba(49,95,156,.25); }
+
+    .big-number { font-size: 58px; line-height: .9; letter-spacing: -0.06em; font-weight: 900; margin-bottom: 10px; }
+    .label { font-size: 12px; text-transform: uppercase; letter-spacing: .11em; color: var(--muted); font-weight: 900; margin-bottom: 8px; }
+    .dark .label { color: rgba(255,250,240,.58); }
+
+    .hero-diagram {
+      margin-top: 42px;
+      display: grid;
+      grid-template-columns: 1.05fr .5fr 1.05fr;
+      gap: 18px;
+      align-items: stretch;
+    }
+    .stack { display: grid; gap: 12px; }
+    .pill { padding: 16px 18px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255,255,255,.5); font-weight: 800; }
+    .arrow { display: grid; place-items: center; color: var(--gold); font-size: 58px; font-weight: 900; }
+
+    .quote-box { margin-top: 22px; padding: 22px; border-radius: 22px; background: var(--black); color: #fffaf0; font-size: 23px; line-height: 1.28; letter-spacing: -0.02em; }
+    .quote-box em { color: #f2c77a; font-style: normal; }
+
+    .flow { margin-top: 32px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
+    .flow .step { padding: 22px 18px; min-height: 170px; border-radius: 24px; border: 1px solid var(--line); background: rgba(255,255,255,.48); position: relative; }
+    .step-num { width: 34px; height: 34px; display:grid; place-items:center; border-radius: 50%; background: var(--black); color:#fffaf0; font-weight: 900; margin-bottom: 18px; }
+
+    .matrix { margin-top: 30px; display: grid; grid-template-columns: .8fr repeat(4, 1fr); border: 1px solid var(--line); border-radius: 26px; overflow: hidden; }
+    .cell { padding: 18px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); min-height: 76px; background: rgba(255,255,255,.35); }
+    .cell:nth-child(5n) { border-right: 0; }
+    .cell.header { background: var(--black); color: #fffaf0; font-weight: 900; }
+    .cell.good { background: var(--green-soft); }
+    .cell.bad { background: var(--red-soft); }
+
+    .timeline { margin-top: 34px; display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+    .phase { min-height: 325px; padding: 24px; border-radius: 28px; border: 1px solid var(--line); background: rgba(255,255,255,.48); display:flex; flex-direction:column; justify-content:space-between; }
+    .phase b { font-size: 30px; letter-spacing:-.04em; }
+    .phase ul { padding-left: 18px; margin: 18px 0 0; color: var(--muted); line-height: 1.5; font-size: 16px; }
+
+    .bar-chart { margin-top: 36px; height: 360px; display:flex; align-items:end; gap: 24px; padding: 24px; border-radius: 30px; border:1px solid var(--line); background: rgba(255,255,255,.42); }
+    .bar-wrap { flex:1; display:flex; flex-direction:column; align-items:center; gap: 12px; height:100%; justify-content:end; }
+    .bar { width: 100%; border-radius: 18px 18px 7px 7px; background: var(--green); min-height: 24px; position:relative; display:flex; align-items:flex-start; justify-content:center; color:#fffaf0; padding-top:12px; font-weight:900; }
+    .bar.red { background: var(--red); }
+    .bar.gold { background: var(--gold); }
+    .bar.blue { background: var(--blue); }
+    .bar-label { text-align:center; color: var(--muted); font-size: 14px; font-weight: 800; }
+
+    .price-lanes { display:grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 30px; }
+    .price { padding: 28px; border: 1px solid var(--line); border-radius: 30px; background: rgba(255,255,255,.48); }
+    .price.featured { background: var(--black); color:#fffaf0; transform: translateY(-10px); }
+    .price .amount { font-size: 48px; font-weight: 950; letter-spacing:-.06em; margin: 16px 0 8px; }
+    .price ul { margin: 20px 0 0; padding-left: 18px; color: inherit; opacity: .78; line-height: 1.6; }
+
+    .controls {
+      position: absolute;
+      right: 36px; bottom: 26px;
+      display:flex; align-items:center; gap: 12px;
+      z-index: 10;
+    }
+    .controls button {
+      width: 44px; height: 44px; border-radius: 50%; border:1px solid var(--line); background: var(--card); cursor:pointer; font-size: 20px; box-shadow: 0 8px 30px rgba(55,44,24,.1);
+    }
+    .counter { color: var(--muted); font-size: 13px; font-weight: 800; min-width: 64px; text-align:center; }
+
+    .bottom-tag { position: absolute; left: 64px; bottom: 42px; color: var(--muted); font-size: 13px; font-weight: 800; letter-spacing:.03em; }
+    .risk-list { margin-top: 26px; display:grid; gap: 14px; }
+    .risk { display:grid; grid-template-columns: 180px 1fr; gap: 18px; padding: 18px; border-radius: 20px; border:1px solid var(--line); background: rgba(255,255,255,.45); }
+    .risk b { color: var(--red); }
+
+    @media (max-width: 900px) {
+      body { overflow:auto; }
+      .app { display:block; }
+      aside { display:none; }
+      main { min-height: 100vh; padding: 12px; }
+      .stage { width: 100%; aspect-ratio: auto; min-height: 720px; }
+      .slide { position: relative; min-height: 720px; padding: 34px 24px; border-radius: 24px; overflow:auto; }
+      .grid-2, .grid-3, .grid-4, .flow, .timeline, .price-lanes, .hero-diagram { grid-template-columns: 1fr; }
+      .matrix { grid-template-columns: 1fr; }
+      .cell { border-right:0; }
+      .controls { position: fixed; right: 16px; bottom: 16px; }
+      h1 { font-size: 52px; }
+      h2 { font-size: 42px; }
+      .lead { font-size: 19px; }
+    }
+
+    @media print {
+      body { overflow: visible; background:white; }
+      .app { display:block; }
+      aside, .controls { display:none; }
+      main { padding:0; display:block; }
+      .stage { width:100%; aspect-ratio:auto; }
+      .slide { position:relative; display:block !important; page-break-after:always; border:0; border-radius:0; box-shadow:none; width:100vw; height:56.25vw; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="mark">AI</div>
+        <div><b>Sales Command Center</b><span>Visual business plan</span></div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div class="side-note">
+        Use ← → keys or the bottom buttons. This is a strategic visual plan, not a final financial forecast. Replace pilot pricing and metrics after customer discovery.
+      </div>
+    </aside>
+
+    <main>
+      <div class="stage" id="stage">
+        <section class="slide active" data-title="Thesis">
+          <div class="kicker">Business thesis</div>
+          <h1>Traditional SME sales is not broken because of no CRM. It is broken because the boss cannot see leakage.</h1>
+          <p class="lead">Build an AI-native sales command center for quote-heavy B2B companies where sales happens in WhatsApp, quotations, follow-ups, and salesperson memory.</p>
+          <div class="hero-diagram">
+            <div class="stack">
+              <div class="pill">WhatsApp enquiries</div>
+              <div class="pill">Manual quotes</div>
+              <div class="pill">Excel price lists</div>
+              <div class="pill">Forgotten follow-ups</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="card dark">
+              <div class="label">New category</div>
+              <div class="big-number">AI Sales<br/>Command Center</div>
+              <p class="micro">Daily truth for owners: every lead, quote, follow-up, stuck deal, margin risk, and next action.</p>
+            </div>
+          </div>
+          <div class="bottom-tag">Draft plan for Colby / UA Office / qraft pivot</div>
+        </section>
+
+        <section class="slide" data-title="Customer pain">
+          <div class="kicker">The painful reality</div>
+          <h2>The customer does not wake up wanting CRM. The boss wakes up asking: “Where did the sales go?”</h2>
+          <div class="grid-3">
+            <div class="card red"><div class="label">Leak 01</div><h3>Leads disappear in WhatsApp</h3><p class="micro">Enquiries live inside personal chats. Management sees them only when someone chooses to report.</p></div>
+            <div class="card red"><div class="label">Leak 02</div><h3>Quotes are sent, then forgotten</h3><p class="micro">No clear next action, no aging alert, no quote-level follow-up discipline.</p></div>
+            <div class="card red"><div class="label">Leak 03</div><h3>Discount and margin become invisible</h3><p class="micro">Sales can look active while silently destroying gross profit.</p></div>
+          </div>
+          <div class="quote-box">The real enemy is not lack of software. It is <em>management blindness</em> before month-end results expose the damage.</div>
+        </section>
+
+        <section class="slide" data-title="Wedge">
+          <div class="kicker">Market wedge</div>
+          <h2>Start with quote-heavy B2B businesses. They have urgent pain and familiar workflows.</h2>
+          <div class="grid-4">
+            <div class="card"><div class="big-number">01</div><h3>Office furniture dealers</h3><p class="micro">Catalog, variants, projects, margins, quotation-heavy sales.</p></div>
+            <div class="card"><div class="big-number">02</div><h3>Renovation & fit-out</h3><p class="micro">Site needs, packages, revisions, supplier pricing, approvals.</p></div>
+            <div class="card"><div class="big-number">03</div><h3>AV & event rental</h3><p class="micro">Gear list + labor + dates + add-ons + follow-up.</p></div>
+            <div class="card"><div class="big-number">04</div><h3>Industrial suppliers</h3><p class="micro">Repeat buyers, product options, price lists, negotiated quotes.</p></div>
+          </div>
+          <p class="lead">Beachhead: Malaysia / SEA SME bosses who manage sales by WhatsApp, memory, Excel and ad-hoc reports.</p>
+        </section>
+
+        <section class="slide" data-title="Positioning">
+          <div class="kicker">Positioning</div>
+          <h2>Do not compete as “another CRM.” Compete as the boss’s sales control tower.</h2>
+          <div class="matrix">
+            <div class="cell header">Dimension</div><div class="cell header">CRM</div><div class="cell header">AI Sales Command Center</div><div class="cell header">Why it matters</div><div class="cell header">Message</div>
+            <div class="cell">Core job</div><div class="cell bad">Store sales data</div><div class="cell good">Expose sales leakage</div><div class="cell">Boss needs action, not another database.</div><div class="cell">“Know what is stuck today.”</div>
+            <div class="cell">Workflow</div><div class="cell bad">Manual updates</div><div class="cell good">WhatsApp + quote aware</div><div class="cell">Traditional teams resist admin work.</div><div class="cell">“Works where your team already sells.”</div>
+            <div class="cell">Output</div><div class="cell bad">Dashboard</div><div class="cell good">Daily AI management report</div><div class="cell">Owner wants one clear morning brief.</div><div class="cell">“No digging required.”</div>
+            <div class="cell">Differentiator</div><div class="cell bad">Pipeline stages</div><div class="cell good">Quote + follow-up intelligence</div><div class="cell">Quotes are where B2B revenue is won/lost.</div><div class="cell">“CRM records. We reveal.”</div>
+          </div>
+        </section>
+
+        <section class="slide" data-title="Product system">
+          <div class="kicker">Product architecture</div>
+          <h2>Five-layer system: capture, quote, follow-up, intelligence, boss report.</h2>
+          <div class="flow">
+            <div class="step"><div class="step-num">1</div><h3>Capture</h3><p class="micro">Lead from WhatsApp, website form, manual entry, import.</p></div>
+            <div class="step"><div class="step-num">2</div><h3>Quote</h3><p class="micro">AI extracts requirement, suggests catalog items, drafts quote brief.</p></div>
+            <div class="step"><div class="step-num">3</div><h3>Follow-up</h3><p class="micro">Next action, aging, reminders, message drafts, quote status.</p></div>
+            <div class="step"><div class="step-num">4</div><h3>Intelligence</h3><p class="micro">Stuck deals, margin risk, weak activity, hot opportunities.</p></div>
+            <div class="step"><div class="step-num">5</div><h3>Boss report</h3><p class="micro">Daily WhatsApp/email summary: what happened, what is stuck, what to do.</p></div>
+          </div>
+          <div class="quote-box">Hero feature: <em>“CRM records what your team updates. We expose what your team is forgetting.”</em></div>
+        </section>
+
+        <section class="slide" data-title="Offer">
+          <div class="kicker">Commercial offer</div>
+          <h2>Sell the outcome first: a 30-day AI Sales Visibility Sprint.</h2>
+          <div class="price-lanes">
+            <div class="price"><div class="label">Pilot</div><h3>Visibility Sprint</h3><div class="amount">RM8k</div><p class="micro">For first proof-of-value clients.</p><ul><li>Pipeline + quote tracker</li><li>Sales leakage alerts</li><li>Daily boss report</li><li>1 sales team workflow</li></ul></div>
+            <div class="price featured"><div class="label">Recommended</div><h3>Command Center</h3><div class="amount">RM15k</div><p class="micro">Setup for quote-heavy SME team.</p><ul><li>CRM structure</li><li>Quote workflow</li><li>WhatsApp follow-up system</li><li>Management dashboard</li><li>Training + review</li></ul></div>
+            <div class="price"><div class="label">Retainer</div><h3>AI Sales Ops</h3><div class="amount">RM3k/mo</div><p class="micro">Operate and improve the system.</p><ul><li>Weekly leakage review</li><li>Prompt/workflow tuning</li><li>Dashboard cleanup</li><li>Sales meeting brief</li></ul></div>
+          </div>
+        </section>
+
+        <section class="slide" data-title="Business model">
+          <div class="kicker">Business model</div>
+          <h2>Service-first, software-later. Use AI to deliver like a lean operator, not a traditional agency.</h2>
+          <div class="bar-chart">
+            <div class="bar-wrap"><div class="bar red" style="height:34%">High labor</div><div class="bar-label">Traditional CRM consulting</div></div>
+            <div class="bar-wrap"><div class="bar gold" style="height:54%">Hybrid</div><div class="bar-label">Productized setup</div></div>
+            <div class="bar-wrap"><div class="bar green" style="height:80%">Repeatable IP</div><div class="bar-label">AI-native delivery</div></div>
+            <div class="bar-wrap"><div class="bar blue" style="height:68%">Recurring</div><div class="bar-label">Monthly sales ops</div></div>
+          </div>
+          <p class="lead">Early revenue comes from setup and retainer. Software modules are built only after the same workflow repeats across 3–5 clients.</p>
+        </section>
+
+        <section class="slide" data-title="Go-to-market">
+          <div class="kicker">Go-to-market</div>
+          <h2>Sell to owners with a painful diagnostic, not a feature demo.</h2>
+          <div class="grid-2">
+            <div class="card dark"><div class="label">Opening hook</div><h3>“Do you know which quotes your team has forgotten this week?”</h3><p class="micro" style="color:rgba(255,250,240,.7); margin-top:16px;">This cuts through generic AI/CRM noise and exposes the management pain.</p></div>
+            <div class="card"><div class="label">Discovery questions</div><h3>Six questions that sell</h3><p class="micro" style="margin-top:14px;">1. How many active leads today?<br/>2. Which quotes are overdue?<br/>3. Who has no next action?<br/>4. Which discounts hurt margin?<br/>5. What is stuck above RM20k?<br/>6. Can you see this without asking your team?</p></div>
+          </div>
+          <div class="quote-box">Primary sales asset: a sample daily AI boss report using the prospect’s industry workflow.</div>
+        </section>
+
+        <section class="slide" data-title="Roadmap">
+          <div class="kicker">Execution roadmap</div>
+          <h2>90 days to prove demand before building full SaaS.</h2>
+          <div class="timeline">
+            <div class="phase"><div><div class="label">Days 1–14</div><b>Design proof offer</b><ul><li>Landing page</li><li>Demo dashboard</li><li>Boss report sample</li><li>Outreach list</li></ul></div><p class="micro">Goal: 20 owner conversations.</p></div>
+            <div class="phase"><div><div class="label">Days 15–30</div><b>Close pilots</b><ul><li>Sell 2–3 paid sprints</li><li>Use manual + no-code stack</li><li>Document repeated pain</li></ul></div><p class="micro">Goal: RM16k–RM45k setup revenue.</p></div>
+            <div class="phase"><div><div class="label">Days 31–60</div><b>Deliver outcomes</b><ul><li>Install pipeline</li><li>Track quotes</li><li>Daily AI report</li><li>Weekly review</li></ul></div><p class="micro">Goal: measurable leakage found.</p></div>
+            <div class="phase"><div><div class="label">Days 61–90</div><b>Productize</b><ul><li>Package modules</li><li>Create templates</li><li>Build core app only where repeated</li></ul></div><p class="micro">Goal: decide SaaS vs service scale.</p></div>
+          </div>
+        </section>
+
+        <section class="slide" data-title="Risks">
+          <div class="kicker">Risks and controls</div>
+          <h2>The danger is not competition. The danger is becoming a generic CRM/AI agency.</h2>
+          <div class="risk-list">
+            <div class="risk"><b>Risk</b><span>Too broad: “AI for SMEs.”<br/><strong>Control:</strong> Start with quote-heavy B2B only.</span></div>
+            <div class="risk"><b>Risk</b><span>Salespeople refuse CRM updates.<br/><strong>Control:</strong> WhatsApp-first workflow + boss report first.</span></div>
+            <div class="risk"><b>Risk</b><span>Overbuilding software before proof.<br/><strong>Control:</strong> Manual/no-code delivery for first 3–5 clients.</span></div>
+            <div class="risk"><b>Risk</b><span>Buyer sees it as “another dashboard.”<br/><strong>Control:</strong> Lead with leakage alerts and daily action summary.</span></div>
+          </div>
+        </section>
+
+        <section class="slide" data-title="Decision">
+          <div class="kicker">Recommended decision</div>
+          <h2>Build the business as an AI-native sales ops company first — not a SaaS company first.</h2>
+          <div class="grid-3">
+            <div class="card green"><div class="big-number">1</div><h3>Package the sprint</h3><p class="micro">Name, price, deliverables, sample boss report, demo.</p></div>
+            <div class="card blue"><div class="big-number">2</div><h3>Sell 3 pilots</h3><p class="micro">Use owner pain interviews and industry-specific examples.</p></div>
+            <div class="card dark"><div class="big-number">3</div><h3>Build only repeated modules</h3><p class="micro">Turn repeated setup work into product. Let customer reality design the software.</p></div>
+          </div>
+          <div class="quote-box">Final principle: <em>strategy here, execution in Claude Code, customer proof before SaaS.</em></div>
+        </section>
+      </div>
+
+      <div class="controls">
+        <button id="prev" aria-label="Previous slide">‹</button>
+        <div class="counter" id="counter">1 / 10</div>
+        <button id="next" aria-label="Next slide">›</button>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const slides = [...document.querySelectorAll('.slide')];
+    const nav = document.getElementById('nav');
+    const counter = document.getElementById('counter');
+    let index = Number(localStorage.getItem('asc-business-plan-slide') || 0);
+    if (!Number.isFinite(index) || index < 0 || index >= slides.length) index = 0;
+
+    slides.forEach((slide, i) => {
+      const btn = document.createElement('button');
+      btn.innerHTML = `<small>${String(i + 1).padStart(2, '0')}</small><span>${slide.dataset.title}</span>`;
+      btn.addEventListener('click', () => show(i));
+      nav.appendChild(btn);
+    });
+
+    function show(i) {
+      index = (i + slides.length) % slides.length;
+      slides.forEach((s, n) => s.classList.toggle('active', n === index));
+      [...nav.children].forEach((b, n) => b.classList.toggle('active', n === index));
+      counter.textContent = `${index + 1} / ${slides.length}`;
+      localStorage.setItem('asc-business-plan-slide', index);
+    }
+
+    document.getElementById('prev').addEventListener('click', () => show(index - 1));
+    document.getElementById('next').addEventListener('click', () => show(index + 1));
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') show(index + 1);
+      if (e.key === 'ArrowLeft') show(index - 1);
+      if (e.key === 'Home') show(0);
+      if (e.key === 'End') show(slides.length - 1);
+    });
+    show(index);
+  </script>
+</body>
+</html>
